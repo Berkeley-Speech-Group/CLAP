@@ -189,6 +189,33 @@ class CLAP_Module(torch.nn.Module):
             audio_embed = audio_embed.detach().cpu().numpy()
         return audio_embed
 
+    def get_audio_embedding_for_finetune(self, x):
+        """get audio embeddings from the audio data
+
+        Parameters
+        ----------
+        x: np.darray | torch.Tensor (N,T): 
+            audio data, must be mono audio tracks.
+        Returns
+        ----------
+        audio embed: numpy.darray | torch.Tensor (N,D):
+            audio embeddings that extracted from audio files
+        """ 
+        self.model.train()
+        audio_input = []
+        for audio_waveform in x:          
+            temp_dict = {}
+            temp_dict = get_audio_features(
+                temp_dict, audio_waveform, 480000, 
+                data_truncating='fusion' if self.enable_fusion else 'rand_trunc', 
+                data_filling='repeatpad',
+                audio_cfg=self.model_cfg['audio_cfg'],
+                require_grad=audio_waveform.requires_grad
+            )
+            audio_input.append(temp_dict)
+        audio_embed = self.model.get_audio_embedding(audio_input)
+        return audio_embed
+
     def get_text_embedding(self, x, tokenizer = None, use_tensor = False):
         """get text embeddings from texts
 
