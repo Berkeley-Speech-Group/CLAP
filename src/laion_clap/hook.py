@@ -210,7 +210,7 @@ class CLAP_Module(torch.nn.Module):
                 data_truncating='fusion' if self.enable_fusion else 'rand_trunc', 
                 data_filling='repeatpad',
                 audio_cfg=self.model_cfg['audio_cfg'],
-                require_grad=audio_waveform.requires_grad
+                require_grad=True
             )
             audio_input.append(temp_dict)
         audio_embed = self.model.get_audio_embedding(audio_input)
